@@ -33,6 +33,7 @@ public class Robot extends TimedRobot {
   private static final int kEncoderPortA = 0;
   private static final int kEncoderPortB = 1;
   private static final int kArmCANId = 1;
+  private static final double kArmMaxSpeed = 0.2;
 
   private PWMSparkMax m_motor;
   private PWMSparkMax m_motor2;
@@ -64,15 +65,20 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Encoder", m_encoder.getDistance());
     SmartDashboard.putNumber("Drive Controller X (wheel 1):", m_driveController.getX());
     SmartDashboard.putNumber("Drive Controller Y (wheel 2):", m_driveController.getY());
-    SmartDashboard.putNumber("System Controller Y (arm):", m_driveController.getY());
+    SmartDashboard.putNumber("System Controller Y (arm):", m_systemController.getY());
+    SmartDashboard.putNumber("Arm Controller Encoder:", m_arm.getEncoder().getPosition());
+    // Arm Values on inital testing ranged from approximately 160 (fully down) to 353 (fully up)
+
   }
 
+  /* This is called every controll packet but only when in teleop Mode... */
   @Override
   public void teleopPeriodic() {
     m_motor.set(m_driveController.getY());
     m_motor2.set(m_driveController.getX());
 
-    m_arm.set(m_systemController.getY());
-
+    m_arm.set(m_systemController.getY() * -1 * kArmMaxSpeed);
   }
+
+
 }
