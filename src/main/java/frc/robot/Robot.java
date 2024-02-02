@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-
 /**
  * This sample program shows how to control a motor using a joystick. In the operator control part
  * of the program, the joystick is read and the value is written to the motor.
@@ -33,6 +32,7 @@ public class Robot extends TimedRobot {
   private static final int kEncoderPortA = 0;
   private static final int kEncoderPortB = 1;
   private static final int kArmCANId = 1;
+  private static final int kIntakeCANId = 2;
   private static final double kArmMaxSpeed = 0.2;
 
   private PWMSparkMax m_motor;
@@ -41,12 +41,15 @@ public class Robot extends TimedRobot {
   private Joystick m_systemController;
   private Encoder m_encoder;
   private CANSparkMax m_arm;
+  private CANSparkMax m_intake;
 
   @Override
   public void robotInit() {
     m_motor = new PWMSparkMax(kMotorPort);
     m_motor2 = new PWMSparkMax(kMotorPort2);
     m_arm = new CANSparkMax(kArmCANId, MotorType.kBrushless);
+    m_intake = new CANSparkMax(kIntakeCANId,MotorType.kBrushless);
+
     m_driveController = new Joystick(kDriveControllerJoystickPort);
     m_systemController = new Joystick(kSystemControllerJoystickPort);
   
@@ -67,17 +70,26 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Drive Controller Y (wheel 2):", m_driveController.getY());
     SmartDashboard.putNumber("System Controller Y (arm):", m_systemController.getY());
     SmartDashboard.putNumber("Arm Controller Encoder:", m_arm.getEncoder().getPosition());
-    // Arm Values on inital testing ranged from approximately 160 (fully down) to 353 (fully up)
+    // Arm Values on inital testing ranged from approximately 160 (fully down) to approximately 353 (fully up)
 
   }
 
-  /* This is called every controll packet but only when in teleop Mode... */
+  /* This is called every control packet but only when in teleop Mode... */
   @Override
   public void teleopPeriodic() {
     m_motor.set(m_driveController.getY());
     m_motor2.set(m_driveController.getX());
 
     m_arm.set(m_systemController.getY() * -1 * kArmMaxSpeed);
+
+    if (m_systemController.getRawButton(3)) {
+      m_intake.set(1);
+    } else if (m_systemController.getRawButton(4)) {
+      m_intake.set(-1);
+    } else {
+      m_intake.set(0);
+    }
+  
   }
 
 
